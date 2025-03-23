@@ -1,0 +1,82 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Cart;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class CartController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+      $cartItems = Cart::where('user_id',Auth::id())->get();
+      return view('cart.index',compact('cartItems'));
+
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'post_id'=> 'required|exists:posts,id',
+            'quantiy'=> 'required|integer|min:1',
+        ]);
+        // $cartItems = Cart::updateOrCreate(
+        Cart::updateOrCreate(    
+            ['user_id'=> Auth::id(),'post_id'=> $request->post_id],
+            ['quantiy'=> $request->quantiy]
+        );
+        return redirect()->route('cart.index')->with('success','Product added to cart successfully');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Cart $cart)
+    {
+        $request->validate([
+            'quantiy'=> 'required|integer|min:1',
+        ]);
+        $cart->update(['quantiy'=> $request->quantiy]);
+        return redirect()->route('cart.index')->with('success','Cart Updated successful');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Cart $cart)
+    {
+        $cart->delete();
+        return redirect()->route('cart.index')->with('success','product removed from cart.');
+    }
+}
